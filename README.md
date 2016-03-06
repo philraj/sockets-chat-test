@@ -1,1 +1,1 @@
-# sockets-p2p-test
+# sockets-chat-test
