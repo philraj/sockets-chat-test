@@ -1,24 +1,67 @@
 import io from 'socket.io-client';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-var socket = io();
 var $ = document.querySelector.bind(document);
-var username = 'anonymous';
+var socket = io();
 
-$('#form').addEventListener('submit', handleSubmit);
+var ChatBox = React.createClass({
+  componentDidMount() {
+    socket.on('chat message', (data) => {
+      this.setState({
+        messages: this.state.messages.concat([data])
+      })
+    });
+  },
 
-function handleSubmit (e) {
-  e.preventDefault();
+  getInitialState() {
+    return {
+      messages: []
+    }
+  },
 
-  var inputName = $('#username').value;
-  if (inputName.length > 0 ) username = inputName;
+  handleSubmit (e) {
+    e.preventDefault();
 
-  socket.emit('chat message', username + ': ' + $('#m').value);
-  $('#m').value = '';
-}
+    var inputName = this.refs.username.value;
 
-socket.on('chat message', function(msg) {
-  var li = document.createElement('li');
-  li.innerHTML = msg;
-  $('#messages').appendChild(li);
-  window.scrollTo(0, document.body.scrollHeight);
-})
+    if (inputName.length === 0 ) {
+      inputName = 'anon';
+    }
+
+    var data = {
+      username: inputName,
+      msg: this.refs.message.value
+    };
+
+    socket.emit('chat message', data);
+    this.refs.message.value = '';
+  },
+
+  render() {
+    // console.log(this.state)
+    var messageList = this.state.messages.map( (message, i) => {
+      return (
+        <li key={i}> {message.username}: {message.msg} </li>
+      )
+    })
+
+    return (
+      <div>
+        <ul id="messages">
+          {messageList}
+        </ul>
+        <form id="form" onSubmit={this.handleSubmit}>
+          <input ref="username" id="username" placeholder="ENTER YOUR NAME..." autoComplete='false'/>
+          <input ref="message" id="m" autoComplete='false'/> <button>Send</button>
+        </form>
+      </div>
+    )
+  },
+
+  componentDidRender() {
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+});
+
+ReactDOM.render(<ChatBox/>, $('#app'));

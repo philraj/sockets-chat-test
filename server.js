@@ -22,13 +22,14 @@ var server = app.listen(port, () => {
 var io = require('socket.io')(server);
 
 io.on('connection', socket => {
-  console.log('a user connected');
+  console.log(socket.id + ' connected');
 
   socket.on('disconnect', () => {
-    console.log('a user disconnected');
+    console.log(socket.id + ' disconnected');
   })
 
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
+  socket.on('chat message', data => {
+    console.log('name:', data.username, '\nmsg:', data.msg);
+    io.emit('chat message', data);
   });
 });
