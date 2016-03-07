@@ -28,6 +28,7 @@ io.on('connection', socket => {
     console.log(socket.id + ' disconnected');
   })
 
+  // re-route data sent by client to all other clients
   socket.on('chat message', data => {
     console.log('name:', data.username, '\nmsg:', data.msg);
     io.emit('chat message', data);
